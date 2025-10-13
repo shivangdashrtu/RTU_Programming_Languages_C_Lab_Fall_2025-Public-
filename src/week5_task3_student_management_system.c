@@ -1,83 +1,106 @@
-// week5_task3_student_management_system.c
-// Task 3: Mini-project – Student management system with file persistence
-// Week 5 – Files & Modular Programming
-// TODO: Implement functions to load, save, add, and list students.
+/*
+Shivang Dash
+231ADB209
+File: week5_task3_student_management_system.c
+Desc: Student management system with file persistence
+*/
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
-#define MAX_STUDENTS 100
-#define NAME_LEN 50
-#define DATA_FILE "students.txt"
+#define MAX_STUDENTS 200
 
 typedef struct {
-    char name[NAME_LEN];
     int id;
+    char name[64];
     float gpa;
 } Student;
 
-// Function prototypes
-int load_students(Student arr[]);
-void save_students(Student arr[], int count);
-void add_student(Student arr[], int *count);
-void list_students(Student arr[], int count);
+int load_students(const char *fname, Student *arr, int *count) {
+    *count = 0;
+    FILE *fp = fopen(fname, "r");
+    if (!fp) return 1; /* Empty/missing file is fine */
+    while (*count < MAX_STUDENTS) {
+        Student s;
+        int r = fscanf(fp, "%d %63s %f", &s.id, s.name, &s.gpa);
+        if (r != 3) break;
+        arr[*count] = s;
+        (*count)++;
+    }
+    fclose(fp);
+    return 1;
+}
+
+int save_students(const char *fname, const Student *arr, int count) {
+    FILE *fp = fopen(fname, "w");
+    if (!fp) return 0;
+    for (int i = 0; i < count; i++) {
+        fprintf(fp, "%d %s %.2f\n", arr[i].id, arr[i].name, arr[i].gpa);
+    }
+    fclose(fp);
+    return 1;
+}
+
+int add_student(Student *arr, int *count) {
+    if (*count >= MAX_STUDENTS) return 0;
+    Student s;
+    printf("Enter name: ");
+    if (scanf("%63s", s.name) != 1) return 0;
+    printf("Enter ID: ");
+    if (scanf("%d", &s.id) != 1) return 0;
+    printf("Enter GPA: ");
+    if (scanf("%f", &s.gpa) != 1) return 0;
+    arr[*count] = s;
+    (*count)++;
+    printf("Student added successfully!\n");
+    return 1;
+}
+
+void list_students(const Student *arr, int count) {
+    if (count == 0) {
+        printf("No students.\n");
+        return;
+    }
+    printf("ID     Name                         GPA\n");
+    for (int i = 0; i < count; i++) {
+        printf("%-6d %-28s %.2f\n", arr[i].id, arr[i].name, arr[i].gpa);
+    }
+}
 
 int main(void) {
+    const char *file = "students.txt";
     Student students[MAX_STUDENTS];
     int count = 0;
-    int choice;
 
-    // TODO: Load existing data from file using load_students()
+    load_students(file, students, &count);
 
-    do {
+    while (1) {
+        int opt;
         printf("\n=== Student Management System ===\n");
         printf("1. List students\n");
         printf("2. Add student\n");
         printf("3. Save and Exit\n");
         printf("Select an option: ");
-        scanf("%d", &choice);
-        getchar(); // clear newline
-
-        switch (choice) {
-            case 1:
-                // TODO: Call list_students()
-                break;
-            case 2:
-                // TODO: Call add_student()
-                break;
-            case 3:
-                // TODO: Call save_students() and exit loop
-                break;
-            default:
-                printf("Invalid option. Try again.\n");
+        if (scanf("%d", &opt) != 1) {
+            fprintf(stderr, "Invalid input.\n");
+            return 1;
         }
-    } while (choice != 3);
-
+        if (opt == 1) {
+            list_students(students, count);
+        } else if (opt == 2) {
+            if (!add_student(students, &count)) {
+                printf("Failed to add student.\n");
+            }
+        } else if (opt == 3) {
+            if (!save_students(file, students, count)) {
+                fprintf(stderr, "Save failed.\n");
+                return 1;
+            }
+            printf("Data saved. Goodbye!\n");
+            break;
+        } else {
+            printf("Unknown option.\n");
+        }
+    }
     return 0;
-}
-
-// TODO: Implement load_students()
-// Open DATA_FILE, read records until EOF, return number of records loaded
-int load_students(Student arr[]) {
-    // ...
-    return 0;
-}
-
-// TODO: Implement save_students()
-// Write all students to DATA_FILE
-void save_students(Student arr[], int count) {
-    // ...
-}
-
-// TODO: Implement add_student()
-// Read input from user and append to array
-void add_student(Student arr[], int *count) {
-    // ...
-}
-
-// TODO: Implement list_students()
-// Print all students in readable format
-void list_students(Student arr[], int count) {
-    // ...
 }

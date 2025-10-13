@@ -1,27 +1,36 @@
-// week5_task1_file_io.c
-// Task 1: Read and write data from text files
-// Week 5 – Files & Modular Programming
-// TODO: Fill in the missing parts marked below.
+/*
+Shivang Dash
+231ADB209
+File: week5_task1_file_io.c
+Desc: Write lines to a text file and read them back
+*/
 
 #include <stdio.h>
-#include <stdlib.h>
 
 int main(void) {
-    FILE *fp;
-    char filename[100] = "data.txt";
-    char line[256];
+    const char *fname = "data.txt";
+    FILE *fp = fopen(fname, "w");
+    if (!fp) {
+        perror("fopen for write");
+        return 1;
+    }
 
-    // TODO: 1. Open file for writing (mode = "w")
-    // TODO: 2. Check if file opened successfully
-    // TODO: 3. Write 2–3 lines of text to the file using fprintf()
-    // TODO: 4. Close the file
+    printf("Writing lines to %s...\n", fname);
+    fprintf(fp, "Hello, file I/O in C!\n");
+    fprintf(fp, "This is another line.\n");
+    fclose(fp);
 
-    // TODO: 5. Open file again for reading (mode = "r")
-    // TODO: 6. Use fgets() in a loop to read and print each line to the console
-    // TODO: 7. Close the file
+    fp = fopen(fname, "r");
+    if (!fp) {
+        perror("fopen for read");
+        return 1;
+    }
 
-    // BONUS: ask user for filename instead of using default "data.txt"
-    // BONUS: count number of lines read
-
+    printf("Reading contents:\n");
+    char buf[256];
+    while (fgets(buf, (int)sizeof(buf), fp)) {
+        fputs(buf, stdout);
+    }
+    fclose(fp);
     return 0;
 }

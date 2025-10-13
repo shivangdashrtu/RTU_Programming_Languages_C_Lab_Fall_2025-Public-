@@ -1,49 +1,56 @@
-// week5_task2_struct_save_load.c
-// Task 2: Save and load structured records from a file
-// Week 5 – Files & Modular Programming
-// TODO: Complete function implementations and file handling logic.
+/*
+Shivang Dash
+231ADB209
+File: week5_task2_struct_save_load.c
+Desc: Save and load a Student struct using text I/O
+*/
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
-#define MAX_NAME_LEN 50
-
 typedef struct {
-    char name[MAX_NAME_LEN];
+    char name[64];
     int age;
     float gpa;
 } Student;
 
-// Function prototypes
-void save_student(Student s, const char *filename);
-Student load_student(const char *filename);
+int save_student(const char *filename, const Student *s) {
+    FILE *fp = fopen(filename, "w");
+    if (!fp) return 0;
+    /* Save format: name age gpa */
+    int ok = fprintf(fp, "%s %d %.2f\n", s->name, s->age, s->gpa) > 0;
+    fclose(fp);
+    return ok;
+}
+
+int load_student(const char *filename, Student *out) {
+    FILE *fp = fopen(filename, "r");
+    if (!fp) return 0;
+    int ok = fscanf(fp, "%63s %d %f", out->name, &out->age, &out->gpa) == 3;
+    fclose(fp);
+    return ok;
+}
 
 int main(void) {
-    Student s1;
-    strcpy(s1.name, "Alice");
-    s1.age = 21;
-    s1.gpa = 3.75f;
+    const char *file = "student.txt";
+    Student a = {0}, b = {0};
 
-    const char *filename = "student.txt";
+    strcpy(a.name, "Alice");
+    a.age = 21;
+    a.gpa = 3.75f;
 
-    // TODO: Call save_student() to save student data to file
-    // TODO: Call load_student() to read data back into a new struct
-    // TODO: Print loaded data to confirm correctness
+    printf("Saving student to file...\n");
+    if (!save_student(file, &a)) {
+        fprintf(stderr, "Save failed.\n");
+        return 1;
+    }
 
+    printf("Loading student from file...\n");
+    if (!load_student(file, &b)) {
+        fprintf(stderr, "Load failed.\n");
+        return 1;
+    }
+
+    printf("Loaded student: %s, %d, GPA %.2f\n", b.name, b.age, b.gpa);
     return 0;
-}
-
-// TODO: Implement save_student()
-// Open file for writing, check errors, write fields, then close file
-void save_student(Student s, const char *filename) {
-    // ...
-}
-
-// TODO: Implement load_student()
-// Open file for reading, check errors, read fields, then close file
-Student load_student(const char *filename) {
-    Student s;
-    // ...
-    return s;
 }
